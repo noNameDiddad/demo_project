@@ -1,0 +1,48 @@
+version: '3'
+services:
+    nginx:
+        image: nginx:1.20.1-alpine
+        container_name: ${COMPOSE_PROJECT_NAME}_nginx
+        volumes:
+            - "./etc/nginx/default.conf:/etc/nginx/conf.d/default.conf"
+            - "./etc/ssl:/etc/ssl"
+            - "./web:/var/www/html"
+            - "./etc/nginx/default.template.conf:/etc/nginx/conf.d/default.template"
+        ports:
+            - "3001:80"
+            - "453:443"
+        environment:
+            - NGINX_HOST=${NGINX_HOST}
+        command: /bin/sh -c "envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+        restart: "no"
+        depends_on:
+            - php
+            - pgsql
+    php:
+        build:
+            context: ./etc/php/nanoninja/php-fpm/${PHP_VERSION}
+        image: nanoninja/php-fpm/${PHP_VERSION}
+        container_name: ${COMPOSE_PROJECT_NAME}_php
+        restart: "no"
+        volumes:
+            - "./etc/php/nanoninja/${PHP_VERSION}/php.ini:/usr/local/etc/php/conf.d/php.ini"
+            - "./web:/var/www/html"
+    adminer:
+        image: adminer
+        ports:
+            - '${ADMINER_PORT:-8080}:8080'
+        container_name: '${COMPOSE_PROJECT_NAME}-adminer'
+        depends_on:
+            - pgsql
+    pgsql:
+        image: 'postgres:${POSTGRES_VERSION}'
+        container_name: '${COMPOSE_PROJECT_NAME}-pgsql'
+        ports:
+            - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: '${POSTGRES_PASSWORD:-secret}'
+            POSTGRES_DB: '${POSTGRES_DB}'
+            POSTGRES_USER: '${POSTGRES_USER}'
+            POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-secret}'
+        volumes:
+            - './data/db/pgsql:/var/lib/postgresql/data'
