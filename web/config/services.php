@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'simple' => [
+        'base_api_key' => env('SIMPLE_BASE_API_KEY'),
+        'optional_api_key' => env('SIMPLE_OPTIONAL_API_KEY'),
+        'base_url' => env('SIMPLE_BASE_URL'),
+        'optional_url' => env('SIMPLE_OPTIONAL_URL'),
+        'base_port' => env('SIMPLE_BASE_PORT'),
+    ]
 ];
