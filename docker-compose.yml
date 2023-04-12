@@ -9,8 +9,8 @@ services:
             - "./web:/var/www/html"
             - "./etc/nginx/default.template.conf:/etc/nginx/conf.d/default.template"
         ports:
-            - "3001:80"
-            - "453:443"
+            - "${NGINX_PORT_FIRST:-3001}:80"
+            - "${NGINX_PORT_SECOND:-453}:443"
         environment:
             - NGINX_HOST=${NGINX_HOST}
         command: /bin/sh -c "envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
@@ -38,7 +38,7 @@ services:
         image: 'postgres:${POSTGRES_VERSION}'
         container_name: '${COMPOSE_PROJECT_NAME}-pgsql'
         ports:
-            - '${FORWARD_DB_PORT:-5432}:5432'
+            - '${PGSQL_DB_PORT:-5432}:5432'
         environment:
             PGPASSWORD: '${POSTGRES_PASSWORD:-secret}'
             POSTGRES_DB: '${POSTGRES_DB}'
